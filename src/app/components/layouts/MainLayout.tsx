@@ -31,7 +31,7 @@ const pageWithBackButton: Record<string, string> = {
   "/app/entertainment/game-topup/arena-of-valor": "Arena of Valor",
   "/app/entertainment/game-topup/call-of-duty-mobile": "Call of Duty Mobile",
   "/app/entertainment/game-topup/clash-of-clans": "Clash of Clans",
-  "/app/entertainment/vouchers": "Digital Vouchers",
+  "/app/entertainment/vouchers": "Digital Lifestyle",
   "/app/entertainment/concerts": "Concert Tickets",
   "/app/entertainment/football": "Football Tickets",
   "/app/support/create-ticket": "Create Ticket",
@@ -60,8 +60,23 @@ export function MainLayout() {
     return null;
   }
 
-  const currentPageTitle = pageWithBackButton[location.pathname];
+  const dynamicPageTitle = location.pathname.startsWith("/app/entertainment/vouchers/")
+    ? "Digital Lifestyle"
+    : location.pathname.startsWith("/app/entertainment/game-topup/")
+      ? "Game Top-Up"
+      : location.pathname.startsWith("/app/entertainment/concerts/")
+        ? "Concert Tickets"
+        : location.pathname.startsWith("/app/entertainment/football/")
+          ? "Football Tickets"
+      : undefined;
+
+  const currentPageTitle = dynamicPageTitle || pageWithBackButton[location.pathname];
   const showBackButton = !!currentPageTitle;
+  const hideMobileBottomNav =
+    location.pathname.startsWith("/app/entertainment/game-topup/") ||
+    location.pathname.startsWith("/app/entertainment/vouchers/") ||
+    location.pathname.startsWith("/app/entertainment/concerts/") ||
+    location.pathname.startsWith("/app/entertainment/football/");
 
   const handleBack = () => {
     navigate(-1);
@@ -164,29 +179,31 @@ export function MainLayout() {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border">
-        <div className="flex justify-around">
-          {navigation.slice(0, 5).map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.path || 
-                             (item.path !== "/" && location.pathname.startsWith(item.path));
-            
-            return (
-              <button
-                key={item.name}
-                onClick={() => navigate(item.path)}
-                className={cn(
-                  "flex flex-col items-center gap-1 px-3 py-2 flex-1",
-                  isActive ? "text-primary" : "text-muted-foreground"
-                )}
-              >
-                <Icon className="w-5 h-5" />
-                <span className="text-xs">{item.name}</span>
-              </button>
-            );
-          })}
-        </div>
-      </nav>
+      {!hideMobileBottomNav ? (
+        <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-background border-t border-border">
+          <div className="flex justify-around">
+            {navigation.slice(0, 5).map((item) => {
+              const Icon = item.icon;
+              const isActive = location.pathname === item.path || 
+                               (item.path !== "/" && location.pathname.startsWith(item.path));
+              
+              return (
+                <button
+                  key={item.name}
+                  onClick={() => navigate(item.path)}
+                  className={cn(
+                    "flex flex-col items-center gap-1 px-3 py-2 flex-1",
+                    isActive ? "text-primary" : "text-muted-foreground"
+                  )}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="text-xs">{item.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+      ) : null}
     </div>
   );
 }

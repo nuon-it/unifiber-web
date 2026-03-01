@@ -1,148 +1,245 @@
-import { useState } from "react";
-import { Search, Gift } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router";
+import { BookOpenText, Headphones, Search, Sparkles, Tv, WalletCards } from "lucide-react";
 import { Card } from "../../components/ui/Card";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Badge";
+import { lifestyleItems, type LifestyleCategory } from "./lifestyleCatalog";
 
-const voucherCategories = [
-  {
-    name: "Streaming Services",
-    vouchers: [
-      { id: 1, name: "Netflix", price: 54000, duration: "1 Month - Mobile", discount: 10 },
-      { id: 2, name: "Netflix", price: 120000, duration: "1 Month - Basic", discount: 0 },
-      { id: 3, name: "Spotify Premium", price: 54900, duration: "1 Month", discount: 15 },
-      { id: 4, name: "Disney+ Hotstar", price: 39000, duration: "1 Month", discount: 0 },
-    ],
-  },
-  {
-    name: "Gaming Platforms",
-    vouchers: [
-      { id: 5, name: "Steam Wallet", price: 60000, duration: "IDR 60,000", discount: 0 },
-      { id: 6, name: "Steam Wallet", price: 120000, duration: "IDR 120,000", discount: 5 },
-      { id: 7, name: "PlayStation Plus", price: 85000, duration: "1 Month", discount: 10 },
-      { id: 8, name: "Xbox Game Pass", price: 49000, duration: "1 Month", discount: 0 },
-    ],
-  },
-  {
-    name: "E-Commerce",
-    vouchers: [
-      { id: 9, name: "Tokopedia", price: 50000, duration: "IDR 50,000", discount: 0 },
-      { id: 10, name: "Shopee", price: 100000, duration: "IDR 100,000", discount: 5 },
-      { id: 11, name: "Grab", price: 50000, duration: "IDR 50,000", discount: 0 },
-      { id: 12, name: "Gojek", price: 100000, duration: "IDR 100,000", discount: 0 },
-    ],
-  },
+const categoryTabs: ("All" | LifestyleCategory)[] = [
+  "All",
+  "Streaming",
+  "Voucher",
+  "Audio",
+  "Reading",
+  "Kids",
+  "Social",
+  "Utility",
 ];
 
-export function Vouchers() {
-  const [searchTerm, setSearchTerm] = useState("");
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(amount);
+}
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  const calculateDiscountedPrice = (price: number, discount: number) => {
-    return price - (price * discount / 100);
-  };
-
+function BenefitsStrip() {
   return (
-    <div className="space-y-6 pb-20 lg:pb-6">
-      {/* Desktop Header */}
-      <div className="hidden lg:block">
-        <h1 className="text-3xl font-bold mb-2">Digital Vouchers</h1>
-        <p className="text-muted-foreground">Beli voucher untuk streaming, gaming & lebih banyak lagi</p>
-      </div>
-
-      {/* Promo Banner */}
-      <Card className="bg-gradient-to-br from-purple-500 to-pink-500 text-white border-0">
-        <div className="flex items-center gap-4">
-          <div className="w-16 h-16 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-            <Gift className="w-8 h-8" />
+    <Card>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="flex items-center gap-3 rounded-lg border border-border p-3">
+          <div className="rounded-full bg-orange-100 p-2">
+            <Tv className="h-4 w-4 text-orange-600" />
           </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-bold mb-1">Special Offer!</h3>
-            <p className="text-sm text-white/80">Get up to 15% off on selected vouchers</p>
+          <div>
+            <p className="text-sm font-medium">Instant Delivery</p>
+            <p className="text-xs text-muted-foreground">Kode masuk dalam hitungan menit</p>
           </div>
         </div>
+
+        <div className="flex items-center gap-3 rounded-lg border border-border p-3">
+          <div className="rounded-full bg-cyan-100 p-2">
+            <WalletCards className="h-4 w-4 text-cyan-700" />
+          </div>
+          <div>
+            <p className="text-sm font-medium">Metode Pembayaran Lengkap</p>
+            <p className="text-xs text-muted-foreground">QRIS, e-wallet, VA, dan kartu</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 rounded-lg border border-border p-3">
+          <div className="rounded-full bg-emerald-100 p-2">
+            <Headphones className="h-4 w-4 text-emerald-700" />
+          </div>
+          <div>
+            <p className="text-sm font-medium">Support 24/7</p>
+            <p className="text-xs text-muted-foreground">Bantuan cepat jika ada kendala</p>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+export function Vouchers() {
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeCategory, setActiveCategory] = useState<"All" | LifestyleCategory>("All");
+  const [showAll, setShowAll] = useState(false);
+
+  const filteredItems = useMemo(() => {
+    const query = searchTerm.toLowerCase();
+
+    return lifestyleItems.filter((item) => {
+      const matchQuery = item.name.toLowerCase().includes(query);
+      const matchCategory = activeCategory === "All" ? true : item.category === activeCategory;
+      return matchQuery && matchCategory;
+    });
+  }, [activeCategory, searchTerm]);
+
+  const popularItems = filteredItems.filter((item) => item.popular).slice(0, 6);
+  const listItems = showAll ? filteredItems : filteredItems.slice(0, 12);
+
+  return (
+    <div className="space-y-5 pb-20 lg:space-y-6 lg:pb-6">
+      <Card className="border-border bg-gradient-to-r from-amber-50 via-orange-50 to-rose-50 p-4 lg:p-6">
+        <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-secondary">
+          <Sparkles className="h-3.5 w-3.5" />
+          Pilihan digital lifestyle lengkap
+        </div>
+        <h1 className="text-2xl font-bold leading-tight lg:text-3xl">Digital Lifestyle</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Streaming, voucher, audio, reading, dan kebutuhan digital harian dalam satu tempat.</p>
       </Card>
 
-      {/* Search Bar */}
-      <div className="relative">
-        <Search className="absolute left-3 top-3 w-5 h-5 text-gray-500" />
-        <input
-          type="text"
-          placeholder="Search vouchers..."
-          className="w-full px-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:border-blue-500"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      <div className="sticky top-16 z-50 -mx-1 space-y-3 border-b border-border bg-background px-1 pb-3 pt-1 shadow-sm">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            type="text"
+            placeholder="Cari produk digital..."
+            value={searchTerm}
+            onChange={(event) => {
+              setSearchTerm(event.target.value);
+              setShowAll(false);
+            }}
+            className="w-full rounded-full border border-border bg-input-background py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-secondary"
+          />
+        </div>
+
+        <div className="category-tabs-scroll flex gap-2 overflow-x-auto pb-1">
+          {categoryTabs.map((category) => (
+            <button
+              key={category}
+              type="button"
+              onClick={() => {
+                setActiveCategory(category);
+                setShowAll(false);
+              }}
+              className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                activeCategory === category
+                  ? "border-secondary bg-secondary text-secondary-foreground"
+                  : "border-border bg-background text-muted-foreground"
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Voucher Categories */}
-      {voucherCategories.map((category, idx) => (
-        <div key={idx}>
-          <h2 className="text-lg font-bold mb-4">{category.name}</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {category.vouchers
-              .filter((voucher) =>
-                voucher.name.toLowerCase().includes(searchTerm.toLowerCase())
-              )
-              .map((voucher) => (
-                <Card key={voucher.id} className="hover:shadow-md transition-shadow">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="font-bold text-lg mb-1">{voucher.name}</h3>
-                      <p className="text-sm text-muted-foreground">{voucher.duration}</p>
-                    </div>
-                    {voucher.discount > 0 && (
-                      <Badge variant="error" className="bg-red-500 text-white">
-                        {voucher.discount}% OFF
-                      </Badge>
-                    )}
+      <div className="hidden lg:block">
+        <BenefitsStrip />
+      </div>
+
+      {popularItems.length > 0 ? (
+        <section>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-base font-bold lg:text-lg">Pilihan populer</h2>
+            <Badge variant="warning">Hot</Badge>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            {popularItems.map((item) => (
+              <Card key={`popular-${item.id}`} className="overflow-hidden p-0">
+                <div className="relative aspect-video bg-muted">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    loading="lazy"
+                    className="h-full w-full object-cover"
+                    onError={(event) => {
+                      event.currentTarget.src = "https://static.upoint.id/images/icons/logo.png";
+                    }}
+                  />
+                  {item.cashback ? (
+                    <span className="absolute right-2 top-2 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-semibold text-white">
+                      {item.cashback}%
+                    </span>
+                  ) : null}
+                </div>
+
+                <div className="space-y-2 p-3">
+                  <div>
+                    <p className="line-clamp-1 text-sm font-semibold">{item.name}</p>
+                    <p className="text-xs text-muted-foreground">Mulai {formatCurrency(item.packages[0].price)}</p>
                   </div>
-                  <div className="flex items-end justify-between">
+
+                  <Button size="sm" className="w-full" onClick={() => navigate(`/app/entertainment/vouchers/${item.slug}`)}>
+                    Pilih produk
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <section>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-base font-bold lg:text-lg">Semua produk</h2>
+          <div className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+            <BookOpenText className="h-3.5 w-3.5" />
+            {filteredItems.length} item
+          </div>
+        </div>
+
+        {listItems.length === 0 ? (
+          <Card className="p-6 text-center">
+            <p className="font-medium">Produk tidak ditemukan</p>
+            <p className="mt-1 text-sm text-muted-foreground">Coba kata kunci atau kategori lain.</p>
+          </Card>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+              {listItems.map((item) => (
+                <Card key={item.id} className="overflow-hidden p-0">
+                  <div className="relative aspect-video bg-muted">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      loading="lazy"
+                      className="h-full w-full object-cover"
+                      onError={(event) => {
+                        event.currentTarget.src = "https://static.upoint.id/images/icons/logo.png";
+                      }}
+                    />
+                  </div>
+
+                  <div className="space-y-2 p-3">
                     <div>
-                      {voucher.discount > 0 ? (
-                        <>
-                          <p className="text-sm text-muted-foreground line-through">
-                            {formatCurrency(voucher.price)}
-                          </p>
-                          <p className="text-xl font-bold text-secondary">
-                            {formatCurrency(calculateDiscountedPrice(voucher.price, voucher.discount))}
-                          </p>
-                        </>
-                      ) : (
-                        <p className="text-xl font-bold text-secondary">
-                          {formatCurrency(voucher.price)}
-                        </p>
-                      )}
+                      <p className="line-clamp-1 text-sm font-semibold">{item.name}</p>
+                      <p className="text-xs text-muted-foreground">{item.category}</p>
+                      <p className="text-sm font-medium text-secondary">Mulai {formatCurrency(item.packages[0].price)}</p>
                     </div>
-                    <Button size="sm">
-                      Buy Now
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => navigate(`/app/entertainment/vouchers/${item.slug}`)}
+                    >
+                      Lihat paket
                     </Button>
                   </div>
                 </Card>
               ))}
-          </div>
-        </div>
-      ))}
+            </div>
 
-      {/* Info */}
-      <Card className="bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-900">
-        <div className="flex items-start gap-3">
-          <Gift className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-          <div>
-            <h4 className="font-medium mb-1 text-blue-900 dark:text-blue-100">How It Works</h4>
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              Purchase your voucher and receive the code instantly. Redeem it on the respective platform. Codes are valid for 1 year unless stated otherwise.
-            </p>
-          </div>
-        </div>
-      </Card>
+            {!showAll && filteredItems.length > listItems.length ? (
+              <div className="mt-4 flex justify-center">
+                <Button variant="outline" size="sm" onClick={() => setShowAll(true)}>
+                  Tampilkan lebih banyak
+                </Button>
+              </div>
+            ) : null}
+          </>
+        )}
+      </section>
+
+      <div className="lg:hidden">
+        <BenefitsStrip />
+      </div>
     </div>
   );
 }

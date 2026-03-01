@@ -9,8 +9,11 @@ import { Entertainment } from "./pages/Entertainment";
 import { GameTopUpImproved } from "./pages/entertainment/GameTopUpImproved";
 import { GameDetailWrapperImproved } from "./pages/entertainment/GameDetailWrapperImproved";
 import { Vouchers } from "./pages/entertainment/Vouchers";
+import { LifestyleDetail } from "./pages/entertainment/LifestyleDetail";
 import { Concerts } from "./pages/entertainment/Concerts";
 import { Football } from "./pages/entertainment/Football";
+import { ConcertDetail } from "./pages/entertainment/ConcertDetail";
+import { FootballDetail } from "./pages/entertainment/FootballDetail";
 import { Rewards } from "./pages/Rewards";
 import { Support } from "./pages/Support";
 import { Installation } from "./pages/Installation";
@@ -37,8 +40,11 @@ export const router = createBrowserRouter([
       { path: "entertainment/game-topup", Component: GameTopUpImproved },
       { path: "entertainment/game-topup/:gameId", Component: GameDetailWrapperImproved },
       { path: "entertainment/vouchers", Component: Vouchers },
+      { path: "entertainment/vouchers/:lifestyleSlug", Component: LifestyleDetail },
       { path: "entertainment/concerts", Component: Concerts },
+      { path: "entertainment/concerts/:concertId", Component: ConcertDetail },
       { path: "entertainment/football", Component: Football },
+      { path: "entertainment/football/:matchId", Component: FootballDetail },
       { path: "rewards", Component: Rewards },
       { path: "support", Component: Support },
       { path: "installation", Component: Installation },

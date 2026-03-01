@@ -1,5 +1,5 @@
 import { useParams } from "react-router";
-import { GameDetailImproved } from "./GameDetailImproved";
+import { GameDetail } from "./GameDetail";
 import { OtherGameDetailImproved } from "./OtherGameDetailImproved";
 
 const supportedGames = [
@@ -19,5 +19,5 @@ export function GameDetailWrapperImproved() {
   // Check if this is a supported game with full detail page
   const isSupportedGame = supportedGames.includes(gameId);
   
-  return isSupportedGame ? <GameDetailImproved /> : <OtherGameDetailImproved />;
+  return isSupportedGame ? <GameDetail /> : <OtherGameDetailImproved />;
 }

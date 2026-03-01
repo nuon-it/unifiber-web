@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useNavigate } from "react-router";
 import { Wifi, Zap, Shield, Headphones, TrendingUp, MapPin, Check, ChevronDown, ChevronUp, Star, X, Smartphone, Bell, CreditCard, Package } from "lucide-react";
 import { IndonesiaMap } from "../components/IndonesiaMap";
@@ -8,6 +8,32 @@ export function Landing() {
   const navigate = useNavigate();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [showCoverageModal, setShowCoverageModal] = useState(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      {
+        threshold: 0.16,
+        rootMargin: "0px 0px -10% 0px",
+      }
+    );
+
+    const nodes = document.querySelectorAll<HTMLElement>("[data-reveal]");
+    nodes.forEach((node) => observer.observe(node));
+
+    return () => observer.disconnect();
+  }, []);
+
+  const revealStyle = (index: number): CSSProperties => ({
+    ["--reveal-delay" as string]: `${Math.min(index * 80, 400)}ms`,
+  });
 
   const features = [
     {
@@ -122,7 +148,7 @@ export function Landing() {
   return (
     <div className="min-h-screen bg-white">
       {/* Top Navigation - Minimal */}
-      <nav className="fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+      <nav className="fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100 landing-nav-enter">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
             <div className="flex items-center gap-2">
@@ -150,7 +176,7 @@ export function Landing() {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-24 md:pt-32 pb-16 md:pb-24 overflow-hidden">
+      <section className="relative pt-24 md:pt-32 pb-16 md:pb-24 overflow-hidden" data-reveal>
         {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#0d2847] via-[#1a3a5c] to-[#0d2847]">
           <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#00b8ff]/20 rounded-full blur-3xl animate-pulse" />
@@ -228,7 +254,7 @@ export function Landing() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-16 md:py-24 bg-gray-50">
+      <section id="features" className="py-16 md:py-24 bg-gray-50" data-reveal>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-[#0d2847] mb-4">
@@ -243,6 +269,8 @@ export function Landing() {
             {features.map((feature, index) => (
               <div
                 key={index}
+                data-reveal
+                style={revealStyle(index)}
                 className="bg-white rounded-2xl p-6 md:p-8 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1"
               >
                 <div className="w-14 h-14 bg-gradient-to-br from-[#00b8ff] to-[#0066cc] rounded-xl flex items-center justify-center mb-4">
@@ -257,7 +285,7 @@ export function Landing() {
       </section>
 
       {/* Packages Section */}
-      <section id="packages" className="py-16 md:py-24 bg-white">
+      <section id="packages" className="py-16 md:py-24 bg-white" data-reveal>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-[#0d2847] mb-4">
@@ -272,6 +300,8 @@ export function Landing() {
             {packages.map((pkg, index) => (
               <div
                 key={index}
+                data-reveal
+                style={revealStyle(index)}
                 className={`relative rounded-2xl p-6 md:p-8 ${
                   pkg.popular
                     ? "bg-gradient-to-br from-[#0d2847] to-[#1a3a5c] text-white shadow-xl scale-105"
@@ -320,7 +350,7 @@ export function Landing() {
       </section>
 
       {/* Coverage Section */}
-      <section id="coverage" className="py-16 md:py-24 bg-gray-50">
+      <section id="coverage" className="py-16 md:py-24 bg-gray-50" data-reveal>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-[#0d2847] mb-4">
@@ -361,7 +391,7 @@ export function Landing() {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {coverageAreas.map((coverage, index) => (
-              <div key={index} className="bg-white rounded-2xl p-6 shadow-sm">
+              <div key={index} data-reveal style={revealStyle(index)} className="bg-white rounded-2xl p-6 shadow-sm">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 bg-[#00b8ff]/10 rounded-lg flex items-center justify-center">
                     <MapPin className="w-5 h-5 text-[#00b8ff]" />
@@ -392,7 +422,7 @@ export function Landing() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-16 md:py-24 bg-white">
+      <section className="py-16 md:py-24 bg-white" data-reveal>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-[#0d2847] mb-4">
@@ -405,7 +435,7 @@ export function Landing() {
 
           <div className="grid md:grid-cols-3 gap-6 md:gap-8">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="bg-gray-50 rounded-2xl p-6 md:p-8">
+              <div key={index} data-reveal style={revealStyle(index)} className="bg-gray-50 rounded-2xl p-6 md:p-8">
                 <div className="flex gap-1 mb-4">
                   {Array.from({ length: testimonial.rating }).map((_, i) => (
                     <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
@@ -423,7 +453,7 @@ export function Landing() {
       </section>
 
       {/* FAQ Section */}
-      <section id="faq" className="py-16 md:py-24 bg-gray-50">
+      <section id="faq" className="py-16 md:py-24 bg-gray-50" data-reveal>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-[#0d2847] mb-4">
@@ -460,7 +490,7 @@ export function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-[#0d2847] via-[#1a3a5c] to-[#0d2847] relative overflow-hidden">
+      <section className="py-16 md:py-24 bg-gradient-to-br from-[#0d2847] via-[#1a3a5c] to-[#0d2847] relative overflow-hidden" data-reveal>
         <div className="absolute inset-0">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#00b8ff]/20 rounded-full blur-3xl" />
         </div>
@@ -482,7 +512,7 @@ export function Landing() {
       </section>
 
       {/* Download App Section */}
-      <section className="py-16 md:py-24 bg-white">
+      <section className="py-16 md:py-24 bg-white" data-reveal>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Left - App Preview */}
@@ -596,7 +626,7 @@ export function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-[#0d2847] text-white py-12 md:py-16">
+      <footer className="bg-[#0d2847] text-white py-12 md:py-16" data-reveal>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>

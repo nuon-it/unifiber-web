@@ -13,12 +13,12 @@ const categories = [
     popular: ["Mobile Legends", "PUBG Mobile", "Free Fire", "Genshin Impact"],
   },
   {
-    title: "Digital Vouchers",
-    description: "Streaming and gaming vouchers",
+    title: "Digital Lifestyle",
+    description: "Streaming, voucher, audio, and apps",
     icon: Gift,
     color: "from-orange-500 to-red-500",
     link: "/app/entertainment/vouchers",
-    popular: ["Netflix", "Spotify", "Steam", "PlayStation Store"],
+    popular: ["Vidio", "Google Play", "Steam Wallet", "TikTok Coins"],
   },
   {
     title: "Concert Tickets",
@@ -166,7 +166,7 @@ export function Entertainment() {
         </Button>
         <Button variant="outline" onClick={() => navigate("/app/entertainment/vouchers")}>
           <Gift className="w-4 h-4 mr-2" />
-          Vouchers
+          Digital Lifestyle
         </Button>
         <Button variant="outline" onClick={() => navigate("/app/entertainment/concerts")}>
           <Ticket className="w-4 h-4 mr-2" />
